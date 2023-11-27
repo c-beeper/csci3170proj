@@ -43,7 +43,8 @@ public class entry {
             stmt.executeUpdate("CREATE TABLE manufacturer (mID INT NOT NULL, mName VARCHAR(20) NOT NULL, mAddress VARCHAR(50) NOT NULL, mPhoneNumber INT NOT NULL, PRIMARY KEY (mID))");
             stmt.executeUpdate("CREATE TABLE part (pID INT NOT NULL, pName VARCHAR(20) NOT NULL, pPrice INT NOT NULL, mID INT NOT NULL, cID INT NOT NULL, pWarrantyPeriod INT NOT NULL, pAvailableQuantity INT NOT NULL, PRIMARY KEY (pID), FOREIGN KEY (cID) REFERENCES category (cID), FOREIGN KEY (mID) REFERENCES manufacturer (mID))");
             stmt.executeUpdate("CREATE TABLE salesperson (sID INT NOT NULL, sName VARCHAR(20) NOT NULL, sAddress VARCHAR(50) NOT NULL, sPhoneNumber INT NOT NULL, sExperience INT NoT NULL, PRIMARY KEY (sID))");
-            stmt.executeUpdate("CREATE TABLE transaction (tID INT NOT NULL, pID INT NOT NULL, sID INT NOT NULL, tDate DATE NOT NULL, PRIMARY KEY (tID), FOREIGN KEY (sID) REFERENCES salesperson (sID), FOREIGN KEY (pID) REFERENCES part (pID))");
+            stmt.executeUpdate("CREATE TABLE transaction (tID INT NOT NULL, pID INT NOT NULL, sID INT NOT NULL, tDate VARCHAR(10) NOT NULL, PRIMARY KEY (tID), FOREIGN KEY (sID) REFERENCES salesperson (sID), FOREIGN KEY (pID) REFERENCES part (pID))");
+            //"Transaction data" should be in DATE format. However, date format in mysql is different from required, and thus using string is more convenient.
             stmt.close();
         } catch(Exception e){
             System.out.println(e);
@@ -57,6 +58,19 @@ public class entry {
         (note: delete order is important - foreign key constraint)
         */
         //TODO: implement delete all tables
+        System.out.print("Processing...");
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("DROP TABLE transaction");
+            stmt.executeUpdate("DROP TABLE salesperson");
+            stmt.executeUpdate("DROP TABLE part");
+            stmt.executeUpdate("DROP TABLE manufacturer");
+            stmt.executeUpdate("DROP TABLE category");
+            stmt.close();
+        } catch(Exception e){
+            System.out.println(e);
+        }
+        System.out.println("Done! Database is removed!");
     }
     public static void load_data(){
         /*
@@ -65,6 +79,79 @@ public class entry {
         into the appropriate table in the database.
         */
         //TODO: implement load from datafile
+        System.out.print("\nType in the Source Data Folder Path: ");
+        try{
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            String folder_path = in.readLine();
+            String this_line;
+            System.out.print("Processing...");
+            //category
+            BufferedReader f_in = new BufferedReader(new FileReader(folder_path + "/category.txt"));
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO category VALUES (?,?)");
+            while((this_line = f_in.readLine()) != null){
+                String[] data = this_line.split("\t");
+                pstmt.setString(1,data[0]);
+                pstmt.setString(2,data[1]);
+                pstmt.executeUpdate();
+            }
+            //manufacturer
+            f_in.close();
+            f_in = new BufferedReader(new FileReader(folder_path + "/manufacturer.txt"));
+            pstmt = conn.prepareStatement("INSERT INTO manufacturer VALUES (?,?,?,?)");
+            while((this_line = f_in.readLine()) != null){
+                String[] data = this_line.split("\t");
+                pstmt.setString(1,data[0]);
+                pstmt.setString(2,data[1]);
+                pstmt.setString(3,data[2]);
+                pstmt.setString(4,data[3]);
+                pstmt.executeUpdate();
+            }
+            //part
+            f_in.close();
+            f_in = new BufferedReader(new FileReader(folder_path + "/part.txt"));
+            pstmt = conn.prepareStatement("INSERT INTO part VALUES (?,?,?,?,?,?,?)");
+            while((this_line = f_in.readLine()) != null){
+                String[] data = this_line.split("\t");
+                pstmt.setString(1,data[0]);
+                pstmt.setString(2,data[1]);
+                pstmt.setString(3,data[2]);
+                pstmt.setString(4,data[3]);
+                pstmt.setString(5,data[4]);
+                pstmt.setString(6,data[5]);
+                pstmt.setString(7,data[6]);
+                pstmt.executeUpdate();
+            }
+            //salesperson
+            f_in.close();
+            f_in = new BufferedReader(new FileReader(folder_path + "/salesperson.txt"));
+            pstmt = conn.prepareStatement("INSERT INTO salesperson VALUES (?,?,?,?,?)");
+            while((this_line = f_in.readLine()) != null){
+                String[] data = this_line.split("\t");
+                pstmt.setString(1,data[0]);
+                pstmt.setString(2,data[1]);
+                pstmt.setString(3,data[2]);
+                pstmt.setString(4,data[3]);
+                pstmt.setString(5,data[4]);
+                pstmt.executeUpdate();
+            }
+            //transaction
+            f_in.close();
+            f_in = new BufferedReader(new FileReader(folder_path + "/transaction.txt"));
+            pstmt = conn.prepareStatement("INSERT INTO transaction VALUES (?,?,?,?)");
+            while((this_line = f_in.readLine()) != null){
+                String[] data = this_line.split("\t");
+                pstmt.setString(1,data[0]);
+                pstmt.setString(2,data[1]);
+                pstmt.setString(3,data[2]);
+                pstmt.setString(4,data[3]);
+                pstmt.executeUpdate();
+            }
+            pstmt.close();
+            f_in.close();
+        } catch(Exception e){
+            System.out.println(e);
+        }
+        System.out.println("Done! Data is inputted to the database!");
     }
     public static void show_content(){
         /*
@@ -72,6 +159,88 @@ public class entry {
         user-specified table.
         */
         //TODO: implement show content of a table
+        System.out.print("Which table would you like to show: ");
+        try{
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            String req_table = in.readLine();
+            Statement stmt = conn.createStatement();
+            if(req_table.equals("category")){
+                System.out.println("Content of table " + req_table + ":");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + req_table);
+                System.out.println("| cID | cName |");
+                while(rs.next()){
+                    System.out.print("|");
+                    for(int i = 1;i <= 2;i++){
+                        System.out.print(" ");
+                        System.out.print(rs.getString(i));
+                        System.out.print(" |");
+                    }
+                    System.out.println("");
+                }
+            }
+            else if(req_table.equals("manufacturer")){
+                System.out.println("Content of table " + req_table + ":");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + req_table);
+                System.out.println("| mID | mName | mAddress | mPhoneNumber |");
+                while(rs.next()){
+                    System.out.print("|");
+                    for(int i = 1;i <= 4;i++){
+                        System.out.print(" ");
+                        System.out.print(rs.getString(i));
+                        System.out.print(" |");
+                    }
+                    System.out.println("");
+                }
+            }
+            else if(req_table.equals("part")){
+                System.out.println("Content of table " + req_table + ":");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + req_table);
+                System.out.println("| pID | pName | pPrice | mID | cID | pWarrantyPeriod | pAvailableQuantity |");
+                while(rs.next()){
+                    System.out.print("|");
+                    for(int i = 1;i <= 7;i++){
+                        System.out.print(" ");
+                        System.out.print(rs.getString(i));
+                        System.out.print(" |");
+                    }
+                    System.out.println("");
+                }
+            }
+            else if(req_table.equals("salesperson")){
+                System.out.println("Content of table " + req_table + ":");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + req_table);
+                System.out.println("| sID | sName | sAddress | sPhoneNumber | sExperience |");
+                while(rs.next()){
+                    System.out.print("|");
+                    for(int i = 1;i <= 5;i++){
+                        System.out.print(" ");
+                        System.out.print(rs.getString(i));
+                        System.out.print(" |");
+                    }
+                    System.out.println("");
+                }
+            }
+            else if(req_table.equals("transaction")){
+                System.out.println("Content of table " + req_table + ":");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + req_table);
+                System.out.println("| tID | pID | sID | tDate |");
+                while(rs.next()){
+                    System.out.print("|");
+                    for(int i = 1;i <= 4;i++){
+                        System.out.print(" ");
+                        System.out.print(rs.getString(i));
+                        System.out.print(" |");
+                    }
+                    System.out.println("");
+                }
+            }
+            else{
+                System.out.println("Error: no table named \"" + req_table + "\".");
+            }
+            stmt.close();
+        } catch(Exception e){
+            System.out.println(e);
+        }
     }
 
     /* Salesperson */
