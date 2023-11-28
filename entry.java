@@ -266,6 +266,109 @@ public class entry {
         - By price, descending order
         */
         //TODO: implement search for parts
+         System.out.println("Choose the Search criterion:");
+        System.out.println("1. Part Name");
+        System.out.println("2. Manufacturer Name");
+        System.out.print("Choose the search criterion: ");
+        //get the first select criterion: by partname/ by manufacturer name
+        BufferedReader stepone = new BufferedReader(new InputStreamReader(System.in));
+        char choiceone = (char)stepone.read();
+        if(choiceone!='1' && choiceone!='2'){
+            System.out.println("Invalid choice!");
+            return;
+        }
+        //get the search keyword:
+        System.out.print("Type in the Search Keyword: ");
+        BufferedReader steptwo = new BufferedReader(new InputStreamReader(System.in));
+        String keyword = steptwo.readLine();
+        //get the second select criterion: asc/ desc
+        System.out.println("Choose ordering: ");
+        System.out.println("1. By price ,ascending order");
+        System.out.println("2. By price, descending order");
+        System.out.print("Choose the search criterion: ");
+        BufferedReader stepthree = new BufferedReader(new InputStreamReader(System.in));
+        char choicetwo = (char)stepthree.read();
+        if(choicetwo!='1' && choicetwo!='2'){
+            System.out.println("Invalid choice!");
+            return;
+        }
+        
+        //do selection
+        if (choiceone=='1'){
+            //by part
+            String query="";
+            if(choicetwo=='1'){
+                //asc
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.pName='"+keyword+"' ORDER BY p.pPrice ASC;";
+
+            }else{
+                //desc
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.mName='"+keyword+"' ORDER BY p.pPrice DESC;";
+            }
+            System.out.println(keyword);
+            System.out.println(query);
+            try{
+                System.out.print("try");
+                Statement stmt = conn.createStatement();
+            
+                ResultSet rs = stmt.executeQuery(query);
+                System.out.println("| ID | Name | Manufacture | Category | Quantity | Warranty | Price |");
+                //print the result
+                while (rs.next()){
+                    int ID=rs.getInt("pID");
+                    String Name=rs.getString("pName");
+                    String Manufacturer = rs.getString("mName");
+                    String Category = rs.getString("cName");
+                    int Quantity = rs.getInt("pAvailableQuantity");
+                    int Warranty = rs.getInt("pWarrantyPeriod");
+                    int Price = rs.getInt("pPrice");
+                    System.out.print("| "+ID+" | "+Name+" | "+Manufacturer+" | "+Category+" | "+Quantity+" | "+Warranty+" | "+Price+" |\n");
+                }
+                System.out.println("End of Query");
+                stmt.close();
+                return;
+            } catch(Exception e){
+                System.out.println("Not Found");
+                return;
+            }
+        }else if (choiceone=='2'){
+            //by manufacture
+            String query="";
+            if(choicetwo=='1'){
+                //asc
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='"+keyword+"' ORDER BY p.pPrice ASC;";
+
+            }else{
+                //desc
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='"+keyword+"' ORDER BY p.pPrice DESC;";
+                //SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='Intel' ORDER BY p.pPrice DESC;
+            }
+            try{
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                System.out.println("| ID | Name | Manufacture | Category | Quantity | Warranty | Price |");
+                //print the result
+                while (rs.next()){
+                    int ID=rs.getInt("pID");
+                    String Name=rs.getString("pName");
+                    String Manufacturer = rs.getString("mName");
+                    String Category = rs.getString("cName");
+                    int Quantity = rs.getInt("pAvailableQuantity");
+                    int Warranty = rs.getInt("pWarrantyPeriod");
+                    int Price = rs.getInt("pPrice");
+                    System.out.print("| "+ID+" | "+Name+" | "+Manufacturer+" | "+Category+" | "+Quantity+" | "+Warranty+" | "+Price+" |"+"\n");
+                }
+                System.out.print("End of Query"); 
+
+                stmt.close();
+                return;
+
+            } catch(Exception e){
+                System.out.println("Not Found");
+                return;
+            }
+
+        }
     }
     public static void sell_part(){
         /*
@@ -284,6 +387,91 @@ public class entry {
         should also be shown.
         */
         //TODO: implement sell a part
+        System.out.print("Enter The Part ID: ");
+        BufferedReader stepone = new BufferedReader(new InputStreamReader(System.in));
+        String partid = stepone.readLine();
+        int pid = Integer.parseInt(partid);
+        //should I test the validity of input?
+        System.out.print("Enter the salesperson ID: ");
+        BufferedReader steptwo = new BufferedReader(new InputStreamReader(System.in));
+        char sid = (char)steptwo.read();
+
+        //should I test the validity of input?
+        try{
+            //preparation
+            int Quantity=-100;
+            String PartName="";
+            int tid = -100;
+            String query="SELECT * FROM part WHERE pID="+partid+";";
+            String get_transactionid="SELECT MAX(tID) FROM transaction;";
+            Statement stmt = conn.createStatement();
+            Statement stmt2 = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            ResultSet last_tid = stmt2.executeQuery(get_transactionid);
+            //get the quantity
+            while(rs.next()){
+                Quantity=rs.getInt("pAvailableQuantity");
+                PartName = rs.getString("pName");
+            }
+            //get the last transaction id
+            while(last_tid.next()){
+                tid=last_tid.getInt("MAX(tID)");
+            }
+            int transaction_tid = tid+1;
+            //do transaction
+            stmt.close();
+            stmt2.close();
+            if(Quantity==0){
+                //part is sold out
+                System.out.println("Error: This part cannot be sold.");
+                return;
+            }else if(Quantity>0){
+                try{
+                   //part is available, sell one and update the part table
+                    String update="UPDATE part SET pAvailableQuantity=? WHERE pID= ?";
+                    PreparedStatement preparedStmt = conn.prepareStatement(update);
+                    preparedStmt.setInt(1,Quantity-1);
+                    preparedStmt.setInt(2,pid);
+                    preparedStmt.executeUpdate(); 
+                    preparedStmt.close();
+                } catch(SQLException e){
+                    System.out.println("Error in update");
+                    return;
+                } catch(Exception e){
+                    e.printStackTrace();
+                    return;
+                }
+                try{
+                    //insert a record into transaction table
+                    String insert="INSERT INTO transaction (tID, pID, sID, tDate) VALUES (?,?,?,?)";
+                    //first, get date
+                    java.util.Date udate = new java.util.Date();
+                    SimpleDateFormat formatDateJava = new SimpleDateFormat("dd/MM/yyyy");
+                    String sdate = formatDateJava.format(udate);
+                    PreparedStatement preparedStmt2 = conn.prepareStatement(insert);
+                    preparedStmt2.setInt(1,transaction_tid);
+                    preparedStmt2.setInt(2,pid);
+                    preparedStmt2.setInt(3,Character.getNumericValue(sid));
+                    preparedStmt2.setString(4, sdate);
+                    preparedStmt2.execute();
+                    preparedStmt2.close();
+                }catch(SQLException e){
+                    System.out.println(e);
+                    return;
+                }catch(Exception e){
+                    e.printStackTrace();
+                    return;
+                }
+                //output the result
+                System.out.println("Product: "+PartName+"(id: "+partid+") Remaining Quantity: "+(Quantity-1));
+
+            }else{
+                System.out.println("error");
+            }
+        }catch(Exception x){
+            System.err.println(x);
+            return;
+        }
     }
 
     /* Manager */
