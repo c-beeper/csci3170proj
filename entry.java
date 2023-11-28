@@ -306,7 +306,6 @@ public class entry {
                 query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.pName LIKE '"+keyword+"%' ORDER BY p.pPrice DESC;";
             }
             try{
-                System.out.print("try");
                 Statement stmt = conn.createStatement();
             
                 ResultSet rs = stmt.executeQuery(query);
