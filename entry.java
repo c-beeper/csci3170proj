@@ -483,6 +483,44 @@ public class entry {
         and years of experience of each salesperson.
         */
         //TODO: implement list all salespersons
+         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            System.out.print("Enter sorting order (ASC/DESC): ");
+            String order;
+            try {
+                order = reader.readLine().toUpperCase(); 
+                String sortOrder = "";
+        
+                if (order.equals("ASC")) {
+                    sortOrder = "ASC";
+                } else if (order.equals("DESC")) {
+                    sortOrder = "DESC";
+                } else {
+                    System.out.println("Invalid sorting order. Please enter ASC or DESC.");
+                    return;
+                }
+        
+                String query = "SELECT sID, sName, sPhoneNumber, sExperience FROM salesperson ORDER BY sExperience " + sortOrder;
+        
+                try (Connection connection = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
+                     Statement statement = connection.createStatement();
+                     ResultSet resultSet = statement.executeQuery(query)) {
+        
+                    // Print the results
+                    System.out.println("Salespersons:");
+                    System.out.println("ID\tName\tPhone Number\tYears of Experience");
+                    while (resultSet.next()) {
+                        int id = resultSet.getInt("sID");
+                        String name = resultSet.getString("sName");
+                        String phoneNumber = resultSet.getString("sPhoneNumber");
+                        int sExperience = resultSet.getInt("sExperience");
+                        System.out.println(id + "\t" + name + "\t" + phoneNumber + "\t" + sExperience);
+                    }            
+                }catch (SQLException e) {
+                        e.printStackTrace();
+                }
+            }catch (IOException e) {
+                e.printStackTrace();
+            }         
     }
     public static void count_record(){
         /*
@@ -502,6 +540,51 @@ public class entry {
         ID and outputted as a table.
         */
         //TODO: implement count the no. of sales record of each salesperson under a specific range on years of experience
+        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.print("Please enter the upper limit of the experience range: ");
+            int startExperience = Integer.parseInt(reader.readLine());
+
+            System.out.print("Please enter the lower limit of the experience range: ");
+            int endExperience = Integer.parseInt(reader.readLine());
+
+            String query = "SELECT salesperson.sID, salesperson.sName, salesperson.sExperience, COUNT(transaction.tID) AS TransactionCount " +
+                    "FROM salesperson " +
+                    "LEFT JOIN transaction ON salesperson.sID = transaction.sID " +
+                    "WHERE sExperience >= ? AND sExperience <= ? " +
+                    "GROUP BY salesperson.sID, salesperson.sName, salesperson.sExperience " +
+                    "ORDER BY salesperson.sID DESC";
+
+            try (Connection connection = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
+                PreparedStatement statement = connection.prepareStatement(query)) {
+
+                // Set the parameters for the query
+                statement.setInt(1, startExperience);
+                statement.setInt(2, endExperience);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    // Print the results
+                    System.out.println("Salespersons within the given range of years of experience:");
+                    System.out.format("%-5s %-20s %-20s %-20s\n", "sID", "sName", "Years of Experience", "Transaction Count");
+                    System.out.println("----------------------------------------------");
+                    while (resultSet.next()) {
+                        int id = resultSet.getInt("sID");
+                        String name = resultSet.getString("sName");
+                        int sExperience = resultSet.getInt("sExperience");
+                        int transactionCount = resultSet.getInt("TransactionCount");
+                        System.out.format("%-5d %-20s %-20d %-20d\n", id, name, sExperience, transactionCount);
+                    }
+                    System.out.println("----------------------------------------------");
+                }catch (IOException | SQLException e) {
+                e.printStackTrace();
+                }
+            }catch (IOException e) {
+            e.printStackTrace();
+            }   
+        }catch (IOException e) {
+            e.printStackTrace();
+        }   
     }
     public static void show_total(){
         /*
@@ -515,6 +598,31 @@ public class entry {
         table.
         */
         //TODO: show the total sales value of each manufacturer
+        String query = "SELECT manufacturer.mID, manufacturer.mName, SUM(part.pPrice) AS TotalSalesValue " +
+                "FROM manufacturer " +
+                "JOIN part ON manufacturer.mID = part.mID " +
+                "GROUP BY manufacturer.mID, manufacturer.mName " +
+                "ORDER BY TotalSalesValue DESC";
+
+        try (Connection connection = DriverManager.getConnection(dbAddress,dbUsername,dbPassword);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            // Print the results
+            System.out.println("Manufacturers sorted by total sales value:");
+            System.out.format("%-5s %-20s %-20s\n", "mID", "mName", "Total Sales Value");
+            System.out.println("----------------------------------------------");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("mID");
+                String name = resultSet.getString("mName");
+                double totalSalesValue = resultSet.getDouble("TotalSalesValue");
+                System.out.format("%-5d %-20s %-20.2f\n", id, name, totalSalesValue);
+            }
+            System.out.println("----------------------------------------------");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     public static void show_popular(){
         /*
@@ -529,6 +637,41 @@ public class entry {
         Number of Transaction as a table.
         */
         //TODO: show the N most popular part
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.print("Please enter the number of parts that you want to list: ");
+            int n = Integer.parseInt(reader.readLine());
+    
+            String query = "SELECT part.pID, part.pName, COUNT(transaction.pID) AS TransactionCount " +
+                    "FROM Parts " +
+                    "LEFT JOIN transaction ON part.pID = transaction.pID " +
+                    "GROUP BY part.pID, part.pName " +
+                    "ORDER BY TransactionCount DESC " +
+                    "LIMIT ?";
+    
+            try (Connection connection = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
+                 PreparedStatement statement = connection.prepareStatement(query)) {
+    
+                // Set the parameter for the query
+                statement.setInt(1, n);
+    
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    // Print the results
+                    System.out.println(n + " most popular parts:");
+                    System.out.format("%-5s %-20s %-20s\n", "ID", "Name", "Transaction Count");
+                    System.out.println("----------------------------------------------");
+                    while (resultSet.next()) {
+                        int id = resultSet.getInt("pID");
+                        String name = resultSet.getString("pName");
+                        int transactionCount = resultSet.getInt("TransactionCount");
+                        System.out.format("%-5d %-20s %-20d\n", id, name, transactionCount);
+                    }
+                    System.out.println("----------------------------------------------");
+                }
+            }
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void menu(int menu_type)
