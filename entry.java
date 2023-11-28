@@ -266,7 +266,7 @@ public class entry {
         - By price, descending order
         */
         //TODO: implement search for parts
-         System.out.println("Choose the Search criterion:");
+        System.out.println("Choose the Search criterion:");
         System.out.println("1. Part Name");
         System.out.println("2. Manufacturer Name");
         System.out.print("Choose the search criterion: ");
@@ -299,14 +299,12 @@ public class entry {
             String query="";
             if(choicetwo=='1'){
                 //asc
-                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.pName='"+keyword+"' ORDER BY p.pPrice ASC;";
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.pName LIKE '"+keyword+"%' ORDER BY p.pPrice ASC;";
 
             }else{
                 //desc
-                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.mName='"+keyword+"' ORDER BY p.pPrice DESC;";
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND p.pName LIKE '"+keyword+"%' ORDER BY p.pPrice DESC;";
             }
-            System.out.println(keyword);
-            System.out.println(query);
             try{
                 System.out.print("try");
                 Statement stmt = conn.createStatement();
@@ -336,12 +334,11 @@ public class entry {
             String query="";
             if(choicetwo=='1'){
                 //asc
-                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='"+keyword+"' ORDER BY p.pPrice ASC;";
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName LIKE '"+keyword+"%' ORDER BY p.pPrice ASC;";
 
             }else{
                 //desc
-                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='"+keyword+"' ORDER BY p.pPrice DESC;";
-                //SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName='Intel' ORDER BY p.pPrice DESC;
+                query = "SELECT p.pID,p.pName,m.mName,c.cName,p.pAvailableQuantity,p.pWarrantyPeriod,p.pPrice FROM part p, manufacturer m, category c WHERE p.cID=c.cID AND p.mID=m.mID AND m.mName LIKE'"+keyword+"%' ORDER BY p.pPrice DESC;";
             }
             try{
                 Statement stmt = conn.createStatement();
