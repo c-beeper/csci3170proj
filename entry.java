@@ -6,6 +6,7 @@
 import java.io.*;
 import java.sql.*;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 public class entry {
     public static int next_menu = 0;
@@ -245,7 +246,7 @@ public class entry {
     }
 
     /* Salesperson */
-    public static void search_parts(){
+    public static void search_parts() throws IOException{
         /*
         The system has to provide an interface to
         allow a salesperson to search for computer
@@ -367,7 +368,7 @@ public class entry {
 
         }
     }
-    public static void sell_part(){
+    public static void sell_part() throws IOException{
         /*
         After a salesperson helps a customer finding
         a part, he/she can then sell the part (i.e.
