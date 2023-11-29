@@ -515,13 +515,12 @@ public class entry {
                         int sExperience = resultSet.getInt("sExperience");
                         System.out.println(id + "\t" + name + "\t" + phoneNumber + "\t" + sExperience);
                     }            
-                }catch (SQLException e) {
-                        e.printStackTrace();
                 }
-            }catch (IOException e) {
+            }catch (Exception e) {
                 e.printStackTrace();
-            }         
+            }     
     }
+    
     public static void count_record(){
         /*
         The system has to provide an interface to
@@ -541,12 +540,12 @@ public class entry {
         */
         //TODO: implement count the no. of sales record of each salesperson under a specific range on years of experience
         
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
-            System.out.print("Please enter the upper limit of the experience range: ");
+            System.out.print("Please enter the lower limit of the experience range: ");
             int startExperience = Integer.parseInt(reader.readLine());
 
-            System.out.print("Please enter the lower limit of the experience range: ");
+            System.out.print("Please enter the upper limit of the experience range: ");
             int endExperience = Integer.parseInt(reader.readLine());
 
             String query = "SELECT salesperson.sID, salesperson.sName, salesperson.sExperience, COUNT(transaction.tID) AS TransactionCount " +
@@ -576,16 +575,13 @@ public class entry {
                         System.out.format("%-5d %-20s %-20d %-20d\n", id, name, sExperience, transactionCount);
                     }
                     System.out.println("----------------------------------------------");
-                }catch (IOException | SQLException e) {
-                e.printStackTrace();
-                }
-            }catch (IOException e) {
-            e.printStackTrace();
-            }   
-        }catch (IOException e) {
+                }   
+            }    
+        }catch (Exception e) {
             e.printStackTrace();
         }   
     }
+    
     public static void show_total(){
         /*
         The system has to provide an interface to
@@ -598,7 +594,7 @@ public class entry {
         table.
         */
         //TODO: show the total sales value of each manufacturer
-        String query = "SELECT manufacturer.mID, manufacturer.mName, SUM(part.pPrice) AS TotalSalesValue " +
+       String query = "SELECT manufacturer.mID, manufacturer.mName, SUM(part.pPrice) AS TotalSalesValue " +
                 "FROM manufacturer " +
                 "JOIN part ON manufacturer.mID = part.mID " +
                 "GROUP BY manufacturer.mID, manufacturer.mName " +
@@ -620,7 +616,7 @@ public class entry {
             }
             System.out.println("----------------------------------------------");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -643,7 +639,7 @@ public class entry {
             int n = Integer.parseInt(reader.readLine());
     
             String query = "SELECT part.pID, part.pName, COUNT(transaction.pID) AS TransactionCount " +
-                    "FROM Parts " +
+                    "FROM part " +
                     "LEFT JOIN transaction ON part.pID = transaction.pID " +
                     "GROUP BY part.pID, part.pName " +
                     "ORDER BY TransactionCount DESC " +
@@ -669,7 +665,7 @@ public class entry {
                     System.out.println("----------------------------------------------");
                 }
             }
-        } catch (IOException | SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
