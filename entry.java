@@ -464,7 +464,7 @@ public class entry {
                 System.out.println("Product: "+PartName+"(id: "+partid+") Remaining Quantity: "+(Quantity-1));
 
             }else{
-                System.out.println("error");
+                System.out.println("Error: The part required does not exist.");
             }
         }catch(Exception x){
             System.err.println(x);
@@ -485,18 +485,21 @@ public class entry {
         */
         //TODO: implement list all salespersons
          BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("Enter sorting order (ASC/DESC): ");
+         System.out.println("Choose ordering:");
+         System.out.println("1. By ascending order");
+         System.out.println("2. By descending order");   
+         System.out.print("Choose the list ordering: ");
             String order;
             try {
                 order = reader.readLine().toUpperCase(); 
                 String sortOrder = "";
         
-                if (order.equals("ASC")) {
+                if (order.equals("1")) {
                     sortOrder = "ASC";
-                } else if (order.equals("DESC")) {
+                } else if (order.equals("2")) {
                     sortOrder = "DESC";
                 } else {
-                    System.out.println("Invalid sorting order. Please enter ASC or DESC.");
+                    System.out.println("Invalid sorting order.");
                     return;
                 }
         
